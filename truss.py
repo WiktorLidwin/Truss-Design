@@ -97,7 +97,8 @@ print("Sx1: "+str(np.round(R[-3][0], 2)))
 print("Sy1: "+str(np.round(R[-2][0], 2)))
 print("Sy2: "+str(np.round(R[-1][0], 2)))
 print("Cost of truss: $" + str(Cost))
-print("Theoretical max load/cost ratio in oz/$: " + str(np.round(np.sum(L * maxAlpha)/Cost,4)))
+print("Theoretical max load/cost ratio in oz/$: " + str(np.round(np.sum(np.abs(L) * maxAlpha)/Cost,4)))
+print("Theoretical max load in oz: " + str(np.round(np.sum(np.abs(L) * maxAlpha),4)))
 print("Member to fail: "+ str(m_fail+1))
 
 # max load is L * maxAlpha
