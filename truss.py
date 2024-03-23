@@ -8,6 +8,8 @@ from scipy.io import loadmat
 data = loadmat('TrussDesign_test.mat')
 
 # Access the parameters
+#  ASSUME PIN SUPPORT IS AT 0,0
+# No negative numbers for X and Y
 C = data['C']
 Sx = data['Sx']
 Sy = data['Sy']
@@ -58,7 +60,9 @@ Cost = np.sum(Lengths) + 10* cols
 Wl =  M = np.zeros((rows*2,  1))
 
 def getPcrit(length):
-    return 40/length #TODO
+    return 3054.789*length**(-2.009)
+
+Uncertainty = 1.36
 
 maxAlpha = 10000
 m_fail = 0
@@ -98,8 +102,49 @@ print("Sy1: "+str(np.round(R[-2][0], 2)))
 print("Sy2: "+str(np.round(R[-1][0], 2)))
 print("Cost of truss: $" + str(Cost))
 print("Theoretical max load/cost ratio in oz/$: " + str(np.round(np.sum(np.abs(L) * maxAlpha)/Cost,4)))
-print("Theoretical max load in oz: " + str(np.round(np.sum(np.abs(L) * maxAlpha),4)))
+print("Theoretical max load in oz: " + str(np.round(np.sum(np.abs(L) * maxAlpha),4)) + " +- " + str(np.round(Uncertainty/Pcrits[m_fail] * np.sum(np.abs(L) * maxAlpha),4)))
 print("Member to fail: "+ str(m_fail+1))
+
+# print(str(Pcrits[m_fail]))
+
+
+Joint_Length_Constraint = ""
+Joint_Length_Constraint_result = np.all((Lengths >= 7) & (Lengths <= 14))
+if (Joint_Length_Constraint_result):
+    Joint_Length_Constraint = "Passed"
+else:
+    Joint_Length_Constraint = "Failed"
+    
+Truss_span_Constraint = ""
+Truss_span_Constraint_min_val = np.min(X)
+Truss_span_Constraint_max_val = np.max(X)
+if (Truss_span_Constraint_max_val - Truss_span_Constraint_min_val == 31):
+    Truss_span_Constraint = "Passed"
+else:
+    Truss_span_Constraint = "Failed"
+    
+nonzero_count = np.count_nonzero(L)
+Load_to_pin_support_span_Constraint = ""
+if (nonzero_count == 1):
+    nonzero_indices = np.nonzero(L)
+    joint = nonzero_indices[0][0]
+    d = dist((0,0),(X[joint],Y[joint]))
+    if(d >= 12.5 and d <= 13.5):
+        Load_to_pin_support_span_Constraint = "Passed"
+    else:
+        Load_to_pin_support_span_Constraint = "Failed: Load is " + str(d) +" in away from PIN, expected 12.5 < d < 13.5"
+else:
+    Load_to_pin_support_span_Constraint = "Failed: " + str(nonzero_count) + " Nonzero Forces(one-dimensional), expected 1"
+Cost_Constraint = ""
+if (Cost < 300):
+    Cost_Constraint = "Passed"
+else:
+    Cost_Constraint = "Failed"
+    
+print("Joint Length Constraint: " + Joint_Length_Constraint)
+print("Truss Span Constraint: " + Truss_span_Constraint)
+print("Load to pin support span Constraint: " + Load_to_pin_support_span_Constraint)
+print("Cost Constraint: " + Cost_Constraint)
 
 # max load is L * maxAlpha
 # this is only valid if load is increase proportionally
