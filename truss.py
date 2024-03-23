@@ -17,7 +17,8 @@ X = data['X'][0]
 Y = data['Y'][0]
 L = data['L']
 
-L = L * 3.07199999
+alpha = 1.0 #scaling, use max alpha from previous calculation to get max support weight
+L = L * alpha
 
 def dist(point1, point2):
     x1, y1 = point1
@@ -64,7 +65,7 @@ def getPcrit(length):
 
 Uncertainty = 1.36
 
-maxAlpha = 10000
+maxAlpha = 100000000
 m_fail = 0
 Pcrits = np.zeros((cols))
 for i in range(cols):
@@ -73,18 +74,18 @@ for i in range(cols):
     tension = Z[i]@L
     if(tension > 0):
         continue
-    alpha = -1.0*pcrit / tension 
-    if (alpha < maxAlpha):
-        maxAlpha = alpha
+    alpha_t = -1.0*pcrit / tension 
+    if (alpha_t < maxAlpha):
+        maxAlpha = alpha_t
         m_fail = i
         
-# print(maxAlpha)
+
 # print(Pcrits)
 # print(L*maxAlpha)
 
-
-
-print("Load: " + str(np.sum(L)) + " oz")
+print("******************************")
+print("Forces\n")
+print("Load: " + str(np.sum(np.abs(L))) + " oz")
 print("Member forces in oz")
 for i in range(cols):
     Dir = "(N)"
@@ -100,10 +101,15 @@ print("Reaction forces in oz:")
 print("Sx1: "+str(np.round(R[-3][0], 2)))
 print("Sy1: "+str(np.round(R[-2][0], 2)))
 print("Sy2: "+str(np.round(R[-1][0], 2)))
+
+
+print("\n\n******************************\nCost/Max Weight Values\n")
 print("Cost of truss: $" + str(Cost))
 print("Theoretical max load/cost ratio in oz/$: " + str(np.round(np.sum(np.abs(L) * maxAlpha)/Cost,4)))
 print("Theoretical max load in oz: " + str(np.round(np.sum(np.abs(L) * maxAlpha),4)) + " +- " + str(np.round(Uncertainty/Pcrits[m_fail] * np.sum(np.abs(L) * maxAlpha),4)))
 print("Member to fail: "+ str(m_fail+1))
+print("Truss can support "+ str(np.round(maxAlpha[0],4))+ " times more force")
+print("Use alpha = "+ str(np.round(maxAlpha[0] * alpha,4))+ " on next run to get max load calculation")
 
 # print(str(Pcrits[m_fail]))
 
@@ -141,6 +147,8 @@ if (Cost < 300):
 else:
     Cost_Constraint = "Failed"
     
+    
+print("\n\n******************************\nConstraints\n")
 print("Joint Length Constraint: " + Joint_Length_Constraint)
 print("Truss Span Constraint: " + Truss_span_Constraint)
 print("Load to pin support span Constraint: " + Load_to_pin_support_span_Constraint)
