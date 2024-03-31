@@ -6,7 +6,6 @@ from scipy.io import loadmat
 
 
 data = loadmat('TrussDesign_test.mat')
-data = loadmat('TrussDesign1_BenZoeJared_A3.mat')
 
 # Access the parameters
 #  ASSUME PIN SUPPORT IS AT 0,0
