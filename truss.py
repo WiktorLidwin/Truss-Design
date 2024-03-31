@@ -6,6 +6,7 @@ from scipy.io import loadmat
 
 
 data = loadmat('TrussDesign_test.mat')
+data = loadmat('TrussDesign1_BenZoeJared_A3.mat')
 
 # Access the parameters
 #  ASSUME PIN SUPPORT IS AT 0,0
@@ -16,7 +17,7 @@ Sy = data['Sy']
 X = data['X'][0]
 Y = data['Y'][0]
 L = data['L']
-
+print(X)
 alpha = 1.0 #scaling, use max alpha from previous calculation to get max support weight
 L = L * alpha
 
@@ -129,11 +130,14 @@ if (Truss_span_Constraint_max_val - Truss_span_Constraint_min_val == 31):
 else:
     Truss_span_Constraint = "Failed"
     
+
 nonzero_count = np.count_nonzero(L)
 Load_to_pin_support_span_Constraint = ""
 if (nonzero_count == 1):
     nonzero_indices = np.nonzero(L)
-    joint = nonzero_indices[0][0]
+    
+    joint = nonzero_indices[0][0]  
+    joint = joint % len(X) 
     d = dist((0,0),(X[joint],Y[joint]))
     if(d >= 12.5 and d <= 13.5):
         Load_to_pin_support_span_Constraint = "Passed"
